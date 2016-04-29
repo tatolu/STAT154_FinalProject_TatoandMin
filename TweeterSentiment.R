@@ -48,7 +48,6 @@ lda.scores<-all_scores(train.Y[-train2],lda.yhat)
 #################
 logit.data<-cbind(train.Y,train.X)
 logit.data<-data.frame(as.matrix(logit.data))
-head(names(logit.data))
 logit.model<-glm(train.Y~.,data=logit.data[train2,],
                  family='binomial')
 logit.yhat<-predict(logit.model,newdata=logit.data[-train2,-1])
@@ -107,3 +106,24 @@ write.csv(logit.output,file='LogitOutput.csv',row.names=FALSE)
 write.csv(rf.output,file='RFOutput.csv',row.names=FALSE)
 write.csv(ridge.logit.output,file='RidgeLogitOutput.csv',row.names=FALSE)
 write.csv(lda.output,file='LDAOutput.csv',row.names=FALSE)
+
+
+#################
+## ROC Curves
+#################
+# install.packages('ROCR')
+library(ROCR)
+
+#Logistic Regression
+p <- predict(logit.model, newdata = logit.data[-train2,], type = 'response')
+pr <- prediction(p, train.Y[-train2])
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf)
+title(main = "Logistic Regression ROC")
+
+#Random Forest
+p_rf <- predict(rf.model, newdata = train.X[-train2,])
+pr_rf <- prediction(p_rf, train.Y[-train2])
+prf_rf <- performance(pr_rf, measure = "tpr", x.measure = "fpr")
+plot(prf_rf)
+title(main = "Random Forest ROC")
